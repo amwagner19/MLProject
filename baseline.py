@@ -151,49 +151,52 @@ X_dev_std = sc.transform(X_dev)
 X_test_std = sc.transform(X_test)
 
 
-# In[14]:
+# In[23]:
 
 
-frequent_clf = DummyClassifier(strategy = 'most_frequent').fit(X_train_std, y_train)
+X_combined_std = np.vstack((X_train_std, X_dev_std)) 
+y_combined = np.hstack((y_train, y_dev))
+
+frequent_clf = DummyClassifier(strategy = 'most_frequent').fit(X_combined_std, y_combined)
 
 
-# In[15]:
+# In[24]:
 
 
 y_freq_pred = frequent_clf.predict(X_test_std)
 
 
-# In[16]:
+# In[25]:
 
 
-stratified_clf = DummyClassifier(strategy = 'stratified').fit(X_train_std, y_train)
+stratified_clf = DummyClassifier(strategy = 'stratified').fit(X_combined_std, y_combined)
 
 
-# In[17]:
+# In[26]:
 
 
 y_strat_pred = stratified_clf.predict(X_test_std)
 
 
-# In[18]:
+# In[27]:
 
 
 frequent_clf.score(X_test_std, y_test)
 
 
-# In[19]:
+# In[28]:
 
 
 stratified_clf.score(X_test_std, y_test)
 
 
-# In[20]:
+# In[29]:
 
 
 print(classification_report(y_test, y_freq_pred))
 
 
-# In[21]:
+# In[30]:
 
 
 print(classification_report(y_test, y_strat_pred))

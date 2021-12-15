@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[223]:
+# In[45]:
 
 
 import numpy as np
@@ -17,19 +17,19 @@ pd.set_option('display.max_columns', None)
 df = pd.read_csv('data.csv')
 
 
-# In[224]:
+# In[46]:
 
 
 df.median()
 
 
-# In[225]:
+# In[47]:
 
 
 df = df.drop(columns='ISO639-3 codes')
 df = df.drop(columns='Name in French')
 df = df.drop(columns='Name in Spanish')
-df = df.drop(columns='Countries')
+df = df.drop(columns='Country codes alpha 3')
 df = df.drop(columns='Alternate names')
 df = df.drop(columns='Name in the language')
 df = df.drop(columns='Sources')
@@ -37,13 +37,13 @@ df = df.drop(columns='Description of the location')
 df.head()
 
 
-# In[226]:
+# In[48]:
 
 
-df[['country_0','country_1','country_2','country_3','country_4','country_5','country_6','country_7','country_8','country_9','country_10','country_11','country_12','country_13','country_14','country_15','country_16','country_17','country_18','country_19','country_20','country_21','country_22','country_23','country_24','country_25','country_26','country_27','country_28']]=df['Country codes alpha 3'].str.split(',', expand = True)
+df[['country_0','country_1','country_2','country_3','country_4','country_5','country_6','country_7','country_8','country_9','country_10','country_11','country_12','country_13','country_14','country_15','country_16','country_17','country_18','country_19','country_20','country_21','country_22','country_23','country_24','country_25','country_26','country_27','country_28']]=df['Countries'].str.split(',', expand = True)
 
 
-# In[227]:
+# In[49]:
 
 
 df['country_1'] = df['country_1']. replace(np. nan, 0)
@@ -76,7 +76,7 @@ df['country_27'] = df['country_27']. replace(np. nan, 0)
 df['country_28'] = df['country_28']. replace(np. nan, 0)
 
 
-# In[228]:
+# In[50]:
 
 
 df['country_0'] = np.where(df['country_0'] != 0, 1, 0)
@@ -110,7 +110,7 @@ df['country_27'] = np.where(df['country_27'] != 0, 1, 0)
 df['country_28'] = np.where(df['country_28'] != 0, 1, 0)
 
 
-# In[229]:
+# In[51]:
 
 
 df['Number of speakers'] = df['Number of speakers']. replace(np. nan, 800)
@@ -118,7 +118,7 @@ df['Latitude'] = df['Latitude']. replace(np. nan, 15.6587)
 df['Longitude'] = df['Longitude']. replace(np. nan, 30.5914)
 
 
-# In[230]:
+# In[52]:
 
 
 num = df['Number of speakers']
@@ -128,21 +128,21 @@ plt.bar(name[0:10], num[0:10])
 plt.show()
 
 
-# In[231]:
+# In[54]:
 
 
-df = df.drop(columns='Country codes alpha 3')
+df = df.drop(columns='Countries')
 df = df.drop(columns='Name in English')
 df = df.drop(columns='ID')
 
 
-# In[232]:
+# In[55]:
 
 
 train, dev, test = np.split(df.sample(frac = 1, random_state = 42), [int(.7*len(df)), int(.85*len(df))])
 
 
-# In[233]:
+# In[56]:
 
 
 X_train = (train.drop(columns = ["Degree of endangerment"])).to_numpy()
@@ -155,7 +155,7 @@ X_test = (test.drop(columns = ["Degree of endangerment"])).to_numpy()
 y_test = test["Degree of endangerment"].to_numpy()
 
 
-# In[234]:
+# In[57]:
 
 
 # feature scaling
@@ -166,7 +166,7 @@ X_dev_std = sc.transform(X_dev)
 X_test_std = sc.transform(X_test)
 
 
-# In[246]:
+# In[58]:
 
 
 svm = SVC()
@@ -174,7 +174,7 @@ svm.fit(X_dev_std, y_dev)
 print("Accuracy is: ", svm.score(X_dev_std, y_dev))
 
 
-# In[241]:
+# In[59]:
 
 
 parameters = {'kernel':('linear', 'rbf', 'poly', 'sigmoid'), 'C':[0.00001, 0.0001, 0.001, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]}
@@ -183,35 +183,48 @@ clf = GridSearchCV(svc, parameters)
 clf.fit(X_dev_std, y_dev)
 
 
-# In[245]:
+# In[60]:
 
 
 clf.best_params_
 
 
-# In[247]:
+# In[61]:
 
 
 clf.best_score_
 
 
-# In[260]:
+# In[65]:
+
+
+X_combined_std = np.vstack((X_train_std, X_dev_std)) 
+y_combined = np.hstack((y_train, y_dev))
+
+
+# In[66]:
 
 
 svc = SVC(C = 1000.0, kernel = 'rbf')
-svc.fit(X_train_std, y_train)
+svc.fit(X_combined_std, y_combined)
 
 
-# In[261]:
+# In[67]:
 
 
 y_pred = svm.predict(X_test_std)
 
 
-# In[262]:
+# In[68]:
 
 
 print(classification_report(y_test, y_pred))
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
